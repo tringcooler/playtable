@@ -19,22 +19,26 @@ define(function(require) {
             this.bg = this.scene.make.image({key: bgname});
             this.group.add(this.bg);
             this.bg_layer.add(this.bg);
-        }
-        
-        add_ent(ent) {
-            this.group.add(ent.go);
-            this.ent_layer.add(ent.go);
-        }
-        
-        start() {
             this.bg.setInteractive();
             this.scene.input.setDraggable(this.bg);
             this.scene.input.on('drag', this.on_drag.bind(this));
         }
         
+        add_ent(ent) {
+            this.group.add(ent.go);
+            this.ent_layer.add(ent.go);
+            ent.go.setInteractive();
+            this.scene.input.setDraggable(ent.go);
+        }
+        
         on_drag(pointer, gameObject, dragX, dragY) {
             //console.log(pointer, gameObject, dragX, dragY);
-            this.group.setXY(dragX, dragY);
+            if(gameObject === this.bg) {
+                this.group.incXY(dragX - gameObject.x, dragY - gameObject.y);
+            } else {
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+            }
         }
         
     }
