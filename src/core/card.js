@@ -4,8 +4,15 @@ define(function(require) {
     
     class c_card extends c_entity {
         
-        constructor() {
-            super();
+        constructor(scene, front, back) {
+            super(scene);
+            this.front_name = front;
+            this.back_name = back;
+        }
+        
+        create() {
+            super.create();
+            this.go = this.scene.make.image({key: this.front_name});
         }
         
     }

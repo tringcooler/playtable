@@ -2,7 +2,11 @@ define(function(require) {
     
     class c_entity {
         
-        constructor() {
+        constructor(scene) {
+            this.scene = scene;
+        }
+        
+        create() {
         }
         
     }
