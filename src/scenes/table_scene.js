@@ -20,13 +20,6 @@ define(function(require) {
         card1.create();
         table.set_bg('bg');
         table.add_ent(card1);
-        /*var box = this.add.image(320, 240, 'box').setInteractive();
-        this.input.setDraggable(box);
-        this.input.topOnly = false;
-        this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-            gameObject.x = dragX;
-            gameObject.y = dragY;
-        });*/
     }
     
     function update(time, delta) {

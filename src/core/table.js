@@ -21,7 +21,9 @@ define(function(require) {
             this.bg_layer.add(this.bg);
             this.bg.setInteractive();
             this.scene.input.setDraggable(this.bg);
-            this.scene.input.on('drag', this.on_drag.bind(this));
+            this.bg.on('drag', (p, x, y) => {
+                this.group.incXY(x - this.bg.x, y - this.bg.y);
+            });
         }
         
         add_ent(ent) {
@@ -29,16 +31,15 @@ define(function(require) {
             this.ent_layer.add(ent.go);
             ent.go.setInteractive();
             this.scene.input.setDraggable(ent.go);
-        }
-        
-        on_drag(pointer, gameObject, dragX, dragY) {
-            //console.log(pointer, gameObject, dragX, dragY);
-            if(gameObject === this.bg) {
-                this.group.incXY(dragX - gameObject.x, dragY - gameObject.y);
-            } else {
-                gameObject.x = dragX;
-                gameObject.y = dragY;
-            }
+            ent.go.on('drag', (p, x, y) => {
+                ent.go.x = x;
+                ent.go.y = y;
+            });
+            ent.go.on('pointerdown', (p) => {
+                console.log('pd');
+            });
+            //this.scene.input.on('drag', (p, go, x, y) => {console.log(go, x, y);debugger;});
+            //this.scene.input.on('pointerdown', (p, go) => {console.log(go);debugger;});
         }
         
     }
