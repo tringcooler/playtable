@@ -10,7 +10,10 @@ define(function(require) {
     
     function preload() {
         this.load.image('box', IMGS('box'));
+        this.load.image('back', IMGS('back'));
         this.load.image('bg', IMGS('bg'));
+        this.load.image('icon_rotate', IMGS('icon_rotate'));
+        this.load.image('icon_flip', IMGS('icon_flip'));
     }
     
     function create() {

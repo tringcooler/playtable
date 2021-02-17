@@ -10,9 +10,25 @@ define(function(require) {
             this.go = this.scene.add.layer();
             this.bg_layer = this.scene.make.layer();
             this.ent_layer = this.scene.make.layer();
+            this.ui_layer = {
+                'icon': this.scene.add.layer(),
+                'card': this.scene.add.layer(),
+            };
             this.group = this.scene.add.group();
             this.go.add(this.bg_layer);
             this.go.add(this.ent_layer);
+            this.icon_go_pool = {};
+        }
+        
+        setup_ent(ent) {
+            for(let act of ent.actions) {
+                if(!this.icon_go_pool[act]) {
+                    let go = ent.create_icon(act);
+                    go.visible = false;
+                    this.ui_layer.icon.add(go);
+                    this.icon_go_pool[act] = go;
+                }
+            }
         }
         
         set_bg(bgname) {
@@ -27,6 +43,7 @@ define(function(require) {
         }
         
         add_ent(ent) {
+            this.setup_ent(ent);
             this.group.add(ent.go);
             this.ent_layer.add(ent.go);
             ent.go.setInteractive();
@@ -34,9 +51,6 @@ define(function(require) {
             ent.go.on('drag', (p, x, y) => {
                 ent.go.x = x;
                 ent.go.y = y;
-            });
-            ent.go.on('pointerdown', (p) => {
-                console.log('pd');
             });
             //this.scene.input.on('drag', (p, go, x, y) => {console.log(go, x, y);debugger;});
             //this.scene.input.on('pointerdown', (p, go) => {console.log(go);debugger;});

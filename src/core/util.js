@@ -6,8 +6,20 @@ define(function(require) {
         }
     };
     
+    const f_get_all_props = function*(obj) {
+        for(let k of Object.getOwnPropertyNames(obj)) {
+            if(k === 'constructor') continue;
+            yield k;
+        }
+        let prt = Object.getPrototypeOf(obj);
+        if(prt && prt.constructor !== Object) {
+            yield* f_get_all_props(prt);
+        }
+    };
+    
     return {
         'symgen': sym_gen,
+        'allprops': f_get_all_props,
     };
     
 });

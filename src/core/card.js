@@ -12,10 +12,13 @@ define(function(require) {
         
         create() {
             super.create();
-            this.go = this.scene.add.container(0, 200);
-            let card = this.scene.make.image({key: this.front_name});
-            this.go.add(card);
-            this.go.setSize(card.width, card.height);
+            this.go = this.scene.make.image({key: this.front_name});
+        }
+        
+        action_flip() {
+        }
+        
+        action_rotate() {
         }
         
     }
