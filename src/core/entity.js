@@ -50,10 +50,12 @@ define(function(require) {
             return [x, y];
         }
         
-        emit(name, ...args) {
+        async emit(name, ...args) {
             let mn = 'on_' + name;
             if(this[mn] instanceof Function) {
-                this[mn](...args);
+                await this[mn](...args);
+            } else {
+                console.log('missed emit:', name);
             }
         }
         

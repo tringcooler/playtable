@@ -20,7 +20,7 @@ define(function(require) {
             this.ent_layer = this.scene.make.layer();
             this.ui_layer = {
                 'icon': this.scene.add.layer(),
-                'card': this.scene.add.layer(),
+                'zoom': this.scene.add.layer(),
             };
             this.group = this.scene.add.group();
             this.go.add(this.bg_layer);
@@ -90,7 +90,7 @@ define(function(require) {
                     if(cidx === ipt_idx && ipt_stat === 'tapdown') {
                         //console.log('long press');
                         this.close_all_menu();
-                        ent.emit('longpress');
+                        await ent.emit('longpress', this);
                         ipt_stat = 'idle';
                     }
                 }
@@ -112,7 +112,7 @@ define(function(require) {
                 } else if(ipt_stat === 'dtapdown') {
                     //console.log('double tap');
                     this.close_all_menu();
-                    ent.emit('doubletap');
+                    await ent.emit('doubletap', this);
                     ipt_stat = 'idle';
                 }
             });
@@ -135,6 +135,15 @@ define(function(require) {
                     go.visible = true;
                 }
             }
+        }
+        
+        async move_layer(ent, lname, cb_back) {
+            let layer = this.ui_layer[lname];
+            if(!layer) {
+                return;
+            }
+            ent.go.disableInteractive();
+            layer.add(ent.go);
         }
         
     }

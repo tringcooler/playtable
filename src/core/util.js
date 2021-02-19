@@ -21,10 +21,20 @@ define(function(require) {
         setTimeout(resolve, ms);
     });
     
+    const atween = (tw, tar, dur, kargs) => new Promise(resolve => {
+        let twconf = Object.assign({}, kargs, {
+            targets: tar,
+            duration: dur,
+            onComplete: resolve,
+        });
+        tw.add(twconf);
+    });
+    
     return {
         'symgen': sym_gen,
         'allprops': f_get_all_props,
         'asleep': asleep,
+        'atween': atween,
     };
     
 });
