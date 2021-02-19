@@ -17,9 +17,14 @@ define(function(require) {
         }
     };
     
+    const asleep = ms => new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+    
     return {
         'symgen': sym_gen,
         'allprops': f_get_all_props,
+        'asleep': asleep,
     };
     
 });
