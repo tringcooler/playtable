@@ -50,6 +50,13 @@ define(function(require) {
             return [x, y];
         }
         
+        emit(name, ...args) {
+            let mn = 'on_' + name;
+            if(this[mn] instanceof Function) {
+                this[mn](...args);
+            }
+        }
+        
     }
     
     return c_entity;

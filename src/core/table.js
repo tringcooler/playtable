@@ -49,6 +49,9 @@ define(function(require) {
             this.bg.on('drag', (p, x, y) => {
                 this.group.incXY(x - this.bg.x, y - this.bg.y);
             });
+            this.bg.on('pointerdown', p => {
+                this.close_all_menu();
+            });
         }
         
         add_ent(ent) {
@@ -85,13 +88,15 @@ define(function(require) {
                     let cidx = ++ipt_idx;
                     await asleep(IPT_TIME_TAP_L);
                     if(cidx === ipt_idx && ipt_stat === 'tapdown') {
-                        console.log('long press');
+                        //console.log('long press');
+                        this.close_all_menu();
+                        ent.emit('longpress');
                         ipt_stat = 'idle';
                     }
                 }
             });
             ent.go.on('pointerup', async p => {
-                if(p.time - p.downtime > IPT_TIME_TAP_D) {
+                if(p.time - p.downTime > IPT_TIME_TAP_D) {
                     ipt_stat = 'idle';
                     return;
                 }
@@ -100,14 +105,16 @@ define(function(require) {
                     let cidx = ipt_idx;
                     await asleep(IPT_TIME_TAP_U);
                     if(cidx === ipt_idx && ipt_stat === 'tapup') {
-                        console.log('tap');
+                        //console.log('tap');
+                        this.open_menu(ent);
                         ipt_stat = 'idle';
                     }
                 } else if(ipt_stat === 'dtapdown') {
-                    console.log('double tap');
+                    //console.log('double tap');
+                    this.close_all_menu();
+                    ent.emit('doubletap');
                     ipt_stat = 'idle';
                 }
-                //this.open_menu(ent);
             });
         }
         
