@@ -72,18 +72,23 @@ define(function(require) {
             this.scene.input.setDraggable(ent.go);
             let ipt_stat = 'idle';
             let ipt_idx = 0;
+            let ipt_breakdrag = false;
             ent.go.on('drag', async (p, x, y) => {
                 if(ipt_stat !== 'idle') {
                     let dpos = Math.abs(p.x - p.downX) + Math.abs(p.y - p.downY);
                     if(dpos > IPT_DPOS_TAP) {
+                        ipt_stat = 'bussy';
                         await this.close_all_menu();
                         ipt_stat = 'idle';
                     }
                 }
-                ent.go.setPosition(x, y);
-                this.ent_layer.bringToTop(ent.go);
+                if(!ipt_breakdrag) {
+                    ent.go.setPosition(x, y);
+                    this.ent_layer.bringToTop(ent.go);
+                }
             });
             ent.go.on('pointerdown', async p => {
+                ipt_breakdrag = false;
                 await this.zoom_out();
                 if(ipt_stat === 'tapup') {
                     ipt_stat = 'dtapdown';
@@ -93,6 +98,8 @@ define(function(require) {
                     await asleep(IPT_TIME_TAP_L);
                     if(cidx === ipt_idx && ipt_stat === 'tapdown') {
                         //console.log('long press');
+                        ipt_stat = 'bussy';
+                        ipt_breakdrag = true;
                         await this.close_all_menu();
                         await ent.emit('longpress', this);
                         ipt_stat = 'idle';
@@ -110,11 +117,13 @@ define(function(require) {
                     await asleep(IPT_TIME_TAP_U);
                     if(cidx === ipt_idx && ipt_stat === 'tapup') {
                         //console.log('tap');
+                        ipt_stat = 'bussy';
                         await this.open_menu(ent);
                         ipt_stat = 'idle';
                     }
                 } else if(ipt_stat === 'dtapdown') {
                     //console.log('double tap');
+                    ipt_stat = 'bussy';
                     await this.close_all_menu();
                     await ent.emit('doubletap', this);
                     ipt_stat = 'idle';
@@ -126,6 +135,8 @@ define(function(require) {
             for(let act in this.icon_go_pool) {
                 let go = this.icon_go_pool[act];
                 go.visible = false;
+                go.disableInteractive();
+                go.off('pointerdown');
             }
         }
         
@@ -137,6 +148,11 @@ define(function(require) {
                     let go = this.icon_go_pool[act];
                     go.setPosition(...pos);
                     go.visible = true;
+                    go.setInteractive();
+                    go.on('pointerdown', async p => {
+                        await ent.act(act);
+                        //await this.close_all_menu();
+                    });
                 }
             }
         }

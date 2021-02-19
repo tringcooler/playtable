@@ -50,6 +50,15 @@ define(function(require) {
             return [x, y];
         }
         
+        async act(name, ...args) {
+            let mn = 'action_' + name;
+            if(this[mn] instanceof Function) {
+                await this[mn](...args);
+            } else {
+                console.log('missed action:', name);
+            }
+        }
+        
         async emit(name, ...args) {
             let mn = 'on_' + name;
             if(this[mn] instanceof Function) {

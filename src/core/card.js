@@ -21,12 +21,14 @@ define(function(require) {
         async zoom_in(tab) {
             let old_info = {
                 scale: this.go.scale,
+                angle: this.go.angle,
                 x: this.go.x,
                 y: this.go.y,
             };
             await tab.zoom_in(this, async () => {
                 await atween(this.scene.tweens, this.go, 100, {
                     scale: 1,
+                    angle: 0,
                     x: this.scene.cameras.main.centerX,
                     y: this.scene.cameras.main.centerY,
                 });
@@ -35,10 +37,14 @@ define(function(require) {
             });
         }
         
-        action_flip() {
+        async action_flip() {
+            console.log('flip');
         }
         
-        action_rotate() {
+        async action_rotate() {
+            await atween(this.scene.tweens, this.go, 100, {
+                angle: '-=90',
+            });
         }
         
         async on_longpress(tab) {
