@@ -19,9 +19,20 @@ define(function(require) {
         }
         
         async zoom_in(tab) {
-            let zoom_out = async () => {};
-            tab.move_layer(this, 'zoom', zoom_out);
-            await atween(this.scene.tweens, this.go, 1000, {scale: 1});
+            let old_info = {
+                scale: this.go.scale,
+                x: this.go.x,
+                y: this.go.y,
+            };
+            await tab.zoom_in(this, async () => {
+                await atween(this.scene.tweens, this.go, 100, {
+                    scale: 1,
+                    x: this.scene.cameras.main.centerX,
+                    y: this.scene.cameras.main.centerY,
+                });
+            }, async () => {
+                await atween(this.scene.tweens, this.go, 100, old_info);
+            });
         }
         
         action_flip() {

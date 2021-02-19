@@ -19,14 +19,15 @@ define(function(require) {
             this.bg_layer = this.scene.make.layer();
             this.ent_layer = this.scene.make.layer();
             this.ui_layer = {
-                'icon': this.scene.add.layer(),
-                'zoom': this.scene.add.layer(),
+                icon: this.scene.add.layer(),
+                zoom: this.scene.add.layer(),
             };
             this.group = this.scene.add.group();
             this.go.add(this.bg_layer);
             this.go.add(this.ent_layer);
             this.icon_go_pool = {};
             this.ent_pool = new Set();
+            this.zoom_slot = null;
         }
         
         setup_ent(ent) {
@@ -49,8 +50,9 @@ define(function(require) {
             this.bg.on('drag', (p, x, y) => {
                 this.group.incXY(x - this.bg.x, y - this.bg.y);
             });
-            this.bg.on('pointerdown', p => {
-                this.close_all_menu();
+            this.bg.on('pointerdown', async p => {
+                await this.close_all_menu();
+                await this.zoom_out();
             });
         }
         
@@ -70,17 +72,19 @@ define(function(require) {
             this.scene.input.setDraggable(ent.go);
             let ipt_stat = 'idle';
             let ipt_idx = 0;
-            ent.go.on('drag', (p, x, y) => {
+            ent.go.on('drag', async (p, x, y) => {
                 if(ipt_stat !== 'idle') {
                     let dpos = Math.abs(p.x - p.downX) + Math.abs(p.y - p.downY);
                     if(dpos > IPT_DPOS_TAP) {
-                        this.close_all_menu();
+                        await this.close_all_menu();
                         ipt_stat = 'idle';
                     }
                 }
                 ent.go.setPosition(x, y);
+                this.ent_layer.bringToTop(ent.go);
             });
             ent.go.on('pointerdown', async p => {
+                await this.zoom_out();
                 if(ipt_stat === 'tapup') {
                     ipt_stat = 'dtapdown';
                 } else {
@@ -89,7 +93,7 @@ define(function(require) {
                     await asleep(IPT_TIME_TAP_L);
                     if(cidx === ipt_idx && ipt_stat === 'tapdown') {
                         //console.log('long press');
-                        this.close_all_menu();
+                        await this.close_all_menu();
                         await ent.emit('longpress', this);
                         ipt_stat = 'idle';
                     }
@@ -106,27 +110,27 @@ define(function(require) {
                     await asleep(IPT_TIME_TAP_U);
                     if(cidx === ipt_idx && ipt_stat === 'tapup') {
                         //console.log('tap');
-                        this.open_menu(ent);
+                        await this.open_menu(ent);
                         ipt_stat = 'idle';
                     }
                 } else if(ipt_stat === 'dtapdown') {
                     //console.log('double tap');
-                    this.close_all_menu();
+                    await this.close_all_menu();
                     await ent.emit('doubletap', this);
                     ipt_stat = 'idle';
                 }
             });
         }
         
-        close_all_menu() {
+        async close_all_menu() {
             for(let act in this.icon_go_pool) {
                 let go = this.icon_go_pool[act];
                 go.visible = false;
             }
         }
         
-        open_menu(ent) {
-            this.close_all_menu();
+        async open_menu(ent) {
+            await this.close_all_menu();
             for(let act of ent.actions) {
                 let pos = ent.get_icon_pos(act);
                 if(pos) {
@@ -137,13 +141,29 @@ define(function(require) {
             }
         }
         
-        async move_layer(ent, lname, cb_back) {
-            let layer = this.ui_layer[lname];
-            if(!layer) {
+        async zoom_in(ent, cb_zoom_in, cb_zoom_out) {
+            await this.zoom_out();
+            ent.go.disableInteractive();
+            this.ui_layer.zoom.add(ent.go);
+            this.zoom_slot = {
+                ent: ent,
+                cb_out: cb_zoom_out,
+            }
+            await cb_zoom_in();
+        }
+        
+        async zoom_out() {
+            if(!this.zoom_slot) {
                 return;
             }
-            ent.go.disableInteractive();
-            layer.add(ent.go);
+            let ent = this.zoom_slot.ent;
+            let cb_out = this.zoom_slot.cb_out;
+            this.zoom_slot = null;
+            this.ent_layer.add(ent.go);
+            if(cb_out instanceof Function) {
+                await cb_out();
+            }
+            ent.go.setInteractive();
         }
         
     }

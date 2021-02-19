@@ -21,14 +21,24 @@ define(function(require) {
         setTimeout(resolve, ms);
     });
     
-    const atween = (tw, tar, dur, kargs) => new Promise(resolve => {
-        let twconf = Object.assign({}, kargs, {
-            targets: tar,
-            duration: dur,
-            onComplete: resolve,
-        });
-        tw.add(twconf);
-    });
+    const atween = (tw, tar, dur, kargs) => {
+        if(!dur) {
+            for(let k in kargs) {
+                if(k in tar) {
+                    tar[k] = kargs[k];
+                }
+            }
+        } else {
+            return new Promise(resolve => {
+                let twconf = Object.assign({}, kargs, {
+                    targets: tar,
+                    duration: dur,
+                    onComplete: resolve,
+                });
+                tw.add(twconf);
+            });
+        }
+    };
     
     return {
         'symgen': sym_gen,
