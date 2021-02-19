@@ -52,8 +52,30 @@ define(function(require) {
                 ent.go.x = x;
                 ent.go.y = y;
             });
+            ent.go.on('pointerdown', p => {
+                this.open_menu(ent);
+            });
             //this.scene.input.on('drag', (p, go, x, y) => {console.log(go, x, y);debugger;});
             //this.scene.input.on('pointerdown', (p, go) => {console.log(go);debugger;});
+        }
+        
+        close_all_menu() {
+            for(let act in this.icon_go_pool) {
+                let go = this.icon_go_pool[act];
+                go.visible = false;
+            }
+        }
+        
+        open_menu(ent) {
+            this.close_all_menu();
+            for(let act of ent.actions) {
+                let pos = ent.get_icon_pos(act);
+                if(pos) {
+                    let go = this.icon_go_pool[act];
+                    go.setPosition(...pos);
+                    go.visible = true;
+                }
+            }
         }
         
     }

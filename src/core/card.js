@@ -13,6 +13,7 @@ define(function(require) {
         create() {
             super.create();
             this.go = this.scene.make.image({key: this.front_name});
+            this.go.scale = 0.5;
         }
         
         action_flip() {
