@@ -2,6 +2,7 @@ define(function(require) {
     
     const c_entity = require('core/entity');
     const atween = require('core/util').atween;
+    const parr_proxy = require('core/util').parrproxy;
     
     const
         ANIM_TIME_COMM = 100;
@@ -22,7 +23,7 @@ define(function(require) {
             this.go.scale = this.zoom_scale;
         }
         
-        async flip(back = null, nscale = null) {
+        async flip(back = null) {
             if(back === null) {
                 back = !this.flip_back;
             } else {
@@ -31,44 +32,43 @@ define(function(require) {
                     return;
                 }
             }
-            let old_sx;
-            if(nscale === null) {
-                old_sx = this.go.scaleX;
-            } else {
-                old_sx = nscale;
-            }
-            await atween(this.scene.tweens, this.go, ANIM_TIME_COMM / 2, {
-                scaleX: 0,
+            this.flip_back = back;
+            let parr_go = parr_proxy(this.go, 'flip', (r, a) => r * a, 1, 1);
+            await atween(this.scene.tweens, parr_go, ANIM_TIME_COMM / 2, {
+                parr_scaleX: 0,
             });
             this.go.setTexture(back ? this.back_name : this.front_name);
-            await atween(this.scene.tweens, this.go, ANIM_TIME_COMM / 2, {
-                scaleX: old_sx,
+            await atween(this.scene.tweens, parr_go, ANIM_TIME_COMM / 2, {
+                parr_scaleX: 1,
             });
-            this.flip_back = back;
         }
         
         async zoom_in(tab) {
             let old_info = {
-                scale: this.go.scale,
+                parr_scaleX: this.go.scale,
+                scaleY: this.go.scale,
                 angle: this.go.angle,
                 x: this.go.x,
                 y: this.go.y,
             };
             let old_flip = this.flip_back;
+            let parr_go = parr_proxy(this.go, 'origin', (r, a) => r * a, 1);
             await tab.zoom_in(this, async () => {
+                let dscale = 1;
                 let prms = [];
-                prms.push(atween(this.scene.tweens, this.go, ANIM_TIME_COMM, {
-                    scale: 1,
+                prms.push(atween(this.scene.tweens, parr_go, ANIM_TIME_COMM, {
+                    parr_scaleX: dscale,
+                    scaleY: dscale,
                     angle: 0,
                     x: this.scene.cameras.main.centerX,
                     y: this.scene.cameras.main.centerY,
                 }));
-                prms.push(this.flip(false, 1));
+                prms.push(this.flip(false));
                 await Promise.all(prms);
             }, async () => {
                 let prms = [];
-                prms.push(atween(this.scene.tweens, this.go, ANIM_TIME_COMM, old_info));
-                prms.push(this.flip(old_flip, old_info.scale));
+                prms.push(atween(this.scene.tweens, parr_go, ANIM_TIME_COMM, old_info));
+                prms.push(this.flip(old_flip));
                 await Promise.all(prms);
             });
         }
