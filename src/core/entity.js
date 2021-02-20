@@ -1,12 +1,17 @@
 define(function(require) {
     
     const f_allprops = require('core/util').allprops;
+    const vec2 = require('core/util').vec2;
+    
+    const
+        DEFAULT_COVER_RANGE = 20;
     
     class c_entity {
         
         constructor(scene) {
             this.scene = scene;
             this.actions = this.get_actions();
+            this.cover_range = DEFAULT_COVER_RANGE;
         }
         
         sort_actions(acts) {
@@ -48,6 +53,11 @@ define(function(require) {
             let y = this.go.y + h / 2 + spc;
             let x = this.go.x - w / 2 + idx * (w / (this.actions.length - 1));
             return [x, y];
+        }
+        
+        check_covered(dpos) {
+            let delt = vec2.dist2(vec2.add([this.go.x, this.go.y], vec2.neg(dpos)));
+            return delt < this.cover_range;
         }
         
         async act(name, ...args) {

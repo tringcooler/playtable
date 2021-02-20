@@ -74,17 +74,17 @@ define(function(require) {
             let ipt_idx = 0;
             let ipt_breakdrag = false;
             ent.go.on('drag', async (p, x, y) => {
-                if(ipt_stat !== 'idle') {
+                if(ipt_stat !== 'drag') {
                     let dpos = Math.abs(p.x - p.downX) + Math.abs(p.y - p.downY);
                     if(dpos > IPT_DPOS_TAP) {
                         ipt_stat = 'bussy';
                         await this.close_all_menu();
-                        ipt_stat = 'idle';
+                        this.ent_layer.bringToTop(ent.go);
+                        ipt_stat = 'drag';
                     }
                 }
                 if(!ipt_breakdrag) {
                     ent.go.setPosition(x, y);
-                    this.ent_layer.bringToTop(ent.go);
                 }
             });
             ent.go.on('pointerdown', async p => {
@@ -107,6 +107,12 @@ define(function(require) {
                 }
             });
             ent.go.on('pointerup', async p => {
+                if(ipt_stat === 'drag') {
+                    ipt_stat = 'bussy';
+                    await this.drag_done(ent);
+                    ipt_stat = 'idle';
+                    return;
+                }
                 if(p.time - p.downTime > IPT_TIME_TAP_D) {
                     ipt_stat = 'idle';
                     return;
@@ -127,8 +133,36 @@ define(function(require) {
                     await this.close_all_menu();
                     await ent.emit('doubletap', this);
                     ipt_stat = 'idle';
+                } else {
+                    ipt_stat = 'idle';
                 }
             });
+        }
+        
+        find_top_cover(ent) {
+            let top_ent = null;
+            let top_idx = -1;
+            for(let dent of this.ent_pool) {
+                if(ent === dent) {
+                    continue;
+                }
+                let didx = this.ent_layer.getIndex(dent.go);
+                if(didx < 0) {
+                    continue;
+                }
+                if(dent.check_covered(ent)) {
+                    if(didx > top_idx) {
+                        top_ent = dent;
+                    }
+                }
+            }
+            return top_ent;
+        }
+        
+        async drag_done(ent) {
+            let cover_ent = this.find_top_cover(ent);
+            if(cover_ent) {
+            }
         }
         
         async close_all_menu() {

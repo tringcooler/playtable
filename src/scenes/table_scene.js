@@ -19,10 +19,13 @@ define(function(require) {
     function create() {
         let table = new c_table(this);
         let card1 = new c_card(this, 'box', 'back');
+        let card2 = new c_card(this, 'box', 'back');
         table.create();
         card1.create();
+        card2.create();
         table.set_bg('bg');
         table.add_ent(card1);
+        table.add_ent(card2);
     }
     
     function update(time, delta) {

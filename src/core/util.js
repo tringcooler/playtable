@@ -130,6 +130,12 @@ define(function(require) {
         
     }
     
+    const
+        vec2_add = (va, vb) => [va[0] + vb[0], va[1] + vb[1]],
+        vec2_neg = v => [-v[0], -v[1]],
+        vec2_dist = v => Math.sqrt(v[0] ** 2 + v[1] ** 2),
+        vec2_dist2 = v => Math.abs(v[0]) + Math.abs(v[1]);
+    
     return {
         'symgen': sym_gen,
         'allprops': f_get_all_props,
@@ -137,6 +143,12 @@ define(function(require) {
         'atween': atween,
         'parrproxy': f_parr_prop_proxy,
         'semaphore': c_semaphore,
+        'vec2': {
+            'add': vec2_add,
+            'neg': vec2_neg,
+            'dist': vec2_dist,
+            'dist2': vec2_dist2,
+        },
     };
     
 });
