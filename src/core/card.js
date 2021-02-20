@@ -3,6 +3,7 @@ define(function(require) {
     const c_entity = require('core/entity');
     const atween = require('core/util').atween;
     const parr_proxy = require('core/util').parrproxy;
+    const c_semaphore = require('core/util').semaphore;
     
     const
         ANIM_TIME_COMM = 100;
@@ -15,6 +16,7 @@ define(function(require) {
             this.back_name = (back ?? front);
             this.zoom_scale = zoom_scale;
             this.flip_back = false;
+            this.sem_bussy = new c_semaphore();
         }
         
         create() {
@@ -23,12 +25,18 @@ define(function(require) {
             this.go.scale = this.zoom_scale;
         }
         
-        async flip(back = null) {
+        async flip(back = null, skip_sem = false) {
+            if(!skip_sem) {
+                await this.sem_bussy.take();
+            }
             if(back === null) {
                 back = !this.flip_back;
             } else {
                 back = !!back;
                 if(this.flip_back === back) {
+                    if(!skip_sem) {
+                        this.sem_bussy.put();
+                    }
                     return;
                 }
             }
@@ -41,9 +49,13 @@ define(function(require) {
             await atween(this.scene.tweens, parr_go, ANIM_TIME_COMM / 2, {
                 parr_scaleX: 1,
             });
+            if(!skip_sem) {
+                this.sem_bussy.put();
+            }
         }
         
         async zoom_in(tab) {
+            await this.sem_bussy.take();
             let old_info = {
                 parr_scaleX: this.go.scale,
                 scaleY: this.go.scale,
@@ -63,14 +75,25 @@ define(function(require) {
                     x: this.scene.cameras.main.centerX,
                     y: this.scene.cameras.main.centerY,
                 }));
-                prms.push(this.flip(false));
+                prms.push(this.flip(false, true));
                 await Promise.all(prms);
             }, async () => {
+                await this.sem_bussy.take();
                 let prms = [];
                 prms.push(atween(this.scene.tweens, parr_go, ANIM_TIME_COMM, old_info));
-                prms.push(this.flip(old_flip));
+                prms.push(this.flip(old_flip, true));
                 await Promise.all(prms);
+                this.sem_bussy.put();
             });
+            this.sem_bussy.put();
+        }
+        
+        async rotate(ang) {
+            await this.sem_bussy.take();
+            await atween(this.scene.tweens, this.go, ANIM_TIME_COMM, {
+                angle: '+=' + ang,
+            });
+            this.sem_bussy.put();
         }
         
         async action_flip() {
@@ -78,9 +101,7 @@ define(function(require) {
         }
         
         async action_rotate() {
-            await atween(this.scene.tweens, this.go, ANIM_TIME_COMM, {
-                angle: '-=90',
-            });
+            await this.rotate(-90);
         }
         
         async on_longpress(tab) {

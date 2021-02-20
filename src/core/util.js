@@ -6,6 +6,10 @@ define(function(require) {
         }
     };
     
+    const [
+        PL_SEM_SEQ,
+    ] = sym_gen();
+    
     const f_get_all_props = function*(obj) {
         for(let k of Object.getOwnPropertyNames(obj)) {
             if(k === 'constructor') continue;
@@ -88,12 +92,51 @@ define(function(require) {
         return new Proxy(obj, prxy_hndl);
     };
     
+    class c_semaphore {
+        
+        constructor() {
+            this[PL_SEM_SEQ] = [];
+        }
+        
+        take() {
+            let cprm;
+            if(this[PL_SEM_SEQ].length > 0){
+                cprm = this[PL_SEM_SEQ][0][0];
+            } else {
+                cprm = Promise.resolve();
+            }
+            let nrslv;
+            let nprm = new Promise(resolve => {
+                nrslv = resolve;
+            });
+            this[PL_SEM_SEQ].unshift([nprm, nrslv]);
+            return cprm;
+        }
+        
+        put() {
+            let seminfo = this[PL_SEM_SEQ].pop(); 
+            if(!seminfo) {
+                return;
+            }
+            let crslv = seminfo[1];
+            crslv?.();
+        }
+        
+        free() {
+            while(this[PL_SEM_SEQ].length > 0) {
+                this.put();
+            }
+        }
+        
+    }
+    
     return {
         'symgen': sym_gen,
         'allprops': f_get_all_props,
         'asleep': asleep,
         'atween': atween,
         'parrproxy': f_parr_prop_proxy,
+        'semaphore': c_semaphore,
     };
     
 });
