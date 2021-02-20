@@ -89,13 +89,16 @@ define(function(require) {
             });
             ent.go.on('pointerdown', async p => {
                 ipt_breakdrag = false;
-                await this.zoom_out();
                 if(ipt_stat === 'tapup') {
                     ipt_stat = 'dtapdown';
+                    await this.zoom_out();
                 } else {
                     ipt_stat = 'tapdown';
                     let cidx = ++ipt_idx;
-                    await asleep(IPT_TIME_TAP_L);
+                    let prms = [];
+                    prms.push(this.zoom_out());
+                    prms.push(asleep(IPT_TIME_TAP_L));
+                    await Promise.all(prms);
                     if(cidx === ipt_idx && ipt_stat === 'tapdown') {
                         //console.log('long press');
                         ipt_stat = 'bussy';
