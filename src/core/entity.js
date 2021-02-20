@@ -44,6 +44,10 @@ define(function(require) {
             return [this.go.displayWidth, this.go.displayHeight];
         }
         
+        get_pos() {
+            return [this.go.x, this.go.y];
+        }
+        
         get_icon_pos(name, spc = 60) {
             let idx = this.actions.indexOf(name);
             if(idx < 0) {

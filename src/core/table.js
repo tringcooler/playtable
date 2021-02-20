@@ -153,7 +153,7 @@ define(function(require) {
                 if(didx < 0) {
                     continue;
                 }
-                if(dent.check_covered(ent)) {
+                if(dent.check_covered(ent.get_pos())) {
                     if(didx > top_idx) {
                         top_ent = dent;
                     }
@@ -165,6 +165,10 @@ define(function(require) {
         async drag_done(ent) {
             let cover_ent = this.find_top_cover(ent);
             if(cover_ent) {
+                let prms = [];
+                prms.push(cover_ent.emit('coveredby', ent, this));
+                prms.push(ent.emit('coverwith', cover_ent, this));
+                await Promise.all(prms);
             }
         }
         
