@@ -14,6 +14,7 @@ define(function(require) {
         this.load.image('bg', IMGS('bg'));
         this.load.image('icon_rotate', IMGS('icon_rotate'));
         this.load.image('icon_flip', IMGS('icon_flip'));
+        this.load.image('icon_movedown', IMGS('icon_movedown'));
     }
     
     function create() {

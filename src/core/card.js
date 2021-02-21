@@ -104,6 +104,10 @@ define(function(require) {
             await this.rotate(-90);
         }
         
+        async action_movedown(tab) {
+            await tab.move_overlap(this, true);
+        }
+        
         async on_longpress(tab) {
             await this.zoom_in(tab);
         }

@@ -183,6 +183,61 @@ define(function(require) {
             return top_ent;
         }
         
+        find_abj_overlaps(ent, with_idx = false) {
+            let sidx = this.ent_layer.getIndex(ent.go);
+            if(sidx < 0) {
+                return [];
+            }
+            let sbnd = ent.go.getBounds();
+            let ovlps_ent = [null, null];
+            let ovlps_idx = [-1, Infinity];
+            for(let dent of this.ent_pool) {
+                if(ent === dent) {
+                    continue;
+                }
+                let didx = this.ent_layer.getIndex(dent.go);
+                if(didx < 0) {
+                    continue;
+                }
+                let dbnd = dent.go.getBounds();
+                if(!Phaser.Geom.Rectangle.Overlaps(sbnd, dbnd)) {
+                    continue;
+                }
+                if(didx < sidx) {
+                    if(didx > ovlps_idx[0]) {
+                        ovlps_ent[0] = dent;
+                        ovlps_idx[0] = didx;
+                    }
+                } else if(didx > sidx) {
+                    if(didx < ovlps_idx[1]) {
+                        ovlps_ent[1] = dent;
+                        ovlps_idx[1] = didx;
+                    }
+                }
+            }
+            if(with_idx) {
+                return [...ovlps_ent, ...ovlps_idx]
+            } else {
+                return ovlps_ent;
+            }
+        }
+        
+        async move_overlap(ent, down = true) {
+            let [ent_d, ent_u, idx_d, idx_u] = this.find_abj_overlaps(ent, true);
+            let dent, didx;
+            if(down) {
+                dent = ent_d;
+                didx = idx_d;
+            } else {
+                dent = ent_u;
+                didx = idx_u;
+            }
+            if(!dent) {
+                return;
+            }
+            this.ent_layer.moveTo(ent.go, didx);
+        }
+        
         async drag_done(ent) {
             let cover_ent = this.find_top_cover(ent);
             if(cover_ent) {
@@ -212,7 +267,7 @@ define(function(require) {
                     go.visible = true;
                     go.setInteractive();
                     go.on('pointerdown', async p => {
-                        await ent.act(act);
+                        await ent.act(act, this);
                         //await this.close_all_menu();
                     });
                 }
