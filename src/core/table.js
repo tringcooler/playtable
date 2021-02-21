@@ -60,11 +60,32 @@ define(function(require) {
             if(this.ent_pool.has(ent)) {
                 return;
             }
-            this.setup_ent(ent);
+            if(!ent.inited_with_table) {
+                this.setup_ent(ent);
+                this.hook_input(ent);
+                ent.inited_with_table = true;
+            } else {
+                ent.go.setInteractive();
+            }
             this.group.add(ent.go);
             this.ent_layer.add(ent.go);
-            this.hook_input(ent);
             this.ent_pool.add(ent);
+        }
+        
+        _remove_ent(ent) {
+            if(!this.ent_pool.has(ent)) {
+                return
+            }
+            ent.go.disableInteractive();
+            this.group.remove(ent.go);
+            this.ent_layer.remove(ent.go);
+            this.ent_pool.delete(ent);
+        }
+        
+        async remove_ent(ent) {
+            await this.close_all_menu();
+            await this.zoom_out();
+            this._remove_ent(ent);
         }
         
         hook_input(ent) {
