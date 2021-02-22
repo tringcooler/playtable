@@ -276,10 +276,15 @@ define(function(require) {
         
         async zoom_in(ent, cb_zoom_in, cb_zoom_out) {
             await this.zoom_out();
+            let sidx = this.ent_layer.getIndex(ent.go);
+            if(sidx < 0) {
+                return;
+            }
             ent.go.disableInteractive();
             this.ui_layer.zoom.add(ent.go);
             this.zoom_slot = {
                 ent: ent,
+                lyr_idx: sidx,
                 cb_out: cb_zoom_out,
             }
             await cb_zoom_in();
@@ -291,8 +296,8 @@ define(function(require) {
             }
             let ent = this.zoom_slot.ent;
             let cb_out = this.zoom_slot.cb_out;
+            this.ent_layer.addAt(ent.go, this.zoom_slot.lyr_idx);
             this.zoom_slot = null;
-            this.ent_layer.add(ent.go);
             if(cb_out instanceof Function) {
                 await cb_out();
             }
