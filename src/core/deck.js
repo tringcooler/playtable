@@ -1,12 +1,13 @@
 define(function(require) {
     
     const c_entity = require('core/entity');
+    const vec2 = require('core/util').vec2;
     const atween = require('core/util').atween;
     const parr_proxy = require('core/util').parrproxy;
     const c_semaphore = require('core/util').semaphore;
     
     const
-        SPC_BTWN_CARDS = 2;
+        SPC_BTWN_CARDS = [-1, -2];
     
     class c_deck extends c_entity {
         
@@ -31,13 +32,13 @@ define(function(require) {
         add_card(card, top = true) {
             let nidx;
             if(top) {
-                card.go.setPosition(0, - SPC_BTWN_CARDS * this.cards_pool.length);
+                card.go.setPosition(...vec2.dot(this.cards_pool.length, SPC_BTWN_CARDS));
                 this.cards_pool.push(card);
                 this.go.add(card.go);
                 this.cards_group.add(card.go);
             } else {
                 card.go.setPosition(0, 0);
-                this.cards_group.incY(- SPC_BTWN_CARDS);
+                this.cards_group.incXY(...SPC_BTWN_CARDS);
                 this.cards_pool.unshift(card);
                 this.go.addAt(card.go, 0);
                 this.cards_group.add(card.go);

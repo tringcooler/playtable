@@ -133,6 +133,7 @@ define(function(require) {
     const
         vec2_add = (va, vb) => [va[0] + vb[0], va[1] + vb[1]],
         vec2_neg = v => [-v[0], -v[1]],
+        vec2_dot = (c, v) => [v[0] * c, v[1] * c],
         vec2_dist = v => Math.sqrt(v[0] ** 2 + v[1] ** 2),
         vec2_dist2 = v => Math.abs(v[0]) + Math.abs(v[1]);
     
@@ -146,6 +147,7 @@ define(function(require) {
         'vec2': {
             'add': vec2_add,
             'neg': vec2_neg,
+            'dot': vec2_dot,
             'dist': vec2_dist,
             'dist2': vec2_dist2,
         },
