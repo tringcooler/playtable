@@ -1,6 +1,7 @@
 define(function(require) {
     
     const c_entity = require('core/entity');
+    const c_deck = require('core/deck');
     const atween = require('core/util').atween;
     const parr_proxy = require('core/util').parrproxy;
     const c_semaphore = require('core/util').semaphore;
@@ -110,6 +111,21 @@ define(function(require) {
         
         async on_longpress(tab) {
             await this.zoom_in(tab);
+        }
+        
+        async on_coveredby(tab, ent) {
+            if(!(ent instanceof c_card)) {
+                return;
+            }
+            let ndeck = new c_deck(this.scene, deck => {
+            });
+            ndeck.create();
+            ndeck.set_pos(this.get_pos());
+            await tab.remove_ent(this);
+            await tab.remove_ent(ent);
+            ndeck.add_card(this);
+            ndeck.add_card(ent);
+            tab.add_ent(ndeck);
         }
         
     }

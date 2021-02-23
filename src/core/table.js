@@ -242,8 +242,8 @@ define(function(require) {
             let cover_ent = this.find_top_cover(ent);
             if(cover_ent) {
                 let prms = [];
-                prms.push(cover_ent.emit('coveredby', ent, this));
-                prms.push(ent.emit('coverwith', cover_ent, this));
+                prms.push(cover_ent.emit('coveredby', this, ent));
+                prms.push(ent.emit('coverwith', this, cover_ent));
                 await Promise.all(prms);
             }
         }

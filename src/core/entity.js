@@ -32,6 +32,10 @@ define(function(require) {
         create() {
         }
         
+        destroy() {
+            this.go.destroy();
+        }
+        
         create_icon(name) {
             let go = null;
             if(this.actions.includes(name)) {
@@ -46,6 +50,10 @@ define(function(require) {
         
         get_pos() {
             return [this.go.x, this.go.y];
+        }
+        
+        set_pos(pos) {
+            this.go.setPosition(...pos);
         }
         
         get_icon_pos(name, spc = 60) {
