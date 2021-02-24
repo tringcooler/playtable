@@ -222,6 +222,14 @@ define(function(require) {
             }
         }
         
+        move_to_last(ent, down = true) {
+            if(down) {
+                this.ent_layer.sendToBack(ent.go);
+            } else {
+                this.ent_layer.bringToTop(ent.go);
+            }
+        }
+        
         async move_overlap(ent, down = true) {
             let [ent_d, ent_u, idx_d, idx_u] = this.find_abj_overlaps(ent, true);
             let dent, didx;

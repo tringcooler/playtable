@@ -8,6 +8,7 @@ define(function(require) {
     
     const
         SPC_BTWN_CARDS = [-1, -2],
+        SPC_DRAW_CARD = [-20, -20],
         ANIM_TIME_COMM = 100;
     
     class c_deck extends c_entity {
@@ -92,17 +93,40 @@ define(function(require) {
                 rcard = this.cards_pool.shift();
             }
             this.go.remove(rcard.go);
+            rcard.go.setPosition(rcard.go.x + this.go.x, rcard.go.y + this.go.y);
             this.cards_group.remove(rcard.go);
             if(this.cards_pool.length === 0) {
                 if(this.cb_destroy instanceof Function) {
-                    this.cb_destroy(this);
+                    await this.cb_destroy(this);
                 }
                 this.destroy();
             }
             return rcard;
         }
         
+        async draw_card(tab, top = true, skip = false) {
+            let anim_time = skip ? 0 : ANIM_TIME_COMM;
+            let card = await this.pop_card(top);
+            tab.add_ent(card);
+            if(!top) {
+                tab.move_to_last(card, true);
+            }
+            let [nx, ny] = vec2.add(this.get_pos(), SPC_DRAW_CARD);
+            await atween(this.scene.tweens, card.go, anim_time, {
+                x: nx,
+                y: ny,
+            });
+            if(this.cards_pool.length === 1) {
+                let bot_card = await this.pop_card(top);
+                tab.add_ent(bot_card);
+                if(top) {
+                    tab.move_to_last(bot_card, true);
+                }
+            }
+        }
+        
         async action_draw(tab) {
+            await this.draw_card(tab, false);
         }
         
     }

@@ -117,7 +117,9 @@ define(function(require) {
             if(!(ent instanceof c_card)) {
                 return;
             }
-            let ndeck = new c_deck(this.scene, deck => {
+            let ndeck = new c_deck(this.scene, async deck => {
+                await tab.remove_ent(deck);
+                console.log('destroyed');
             });
             ndeck.create();
             ndeck.set_pos(this.get_pos());
