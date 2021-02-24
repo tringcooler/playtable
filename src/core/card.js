@@ -119,7 +119,6 @@ define(function(require) {
             }
             let ndeck = new c_deck(this.scene, async deck => {
                 await tab.remove_ent(deck);
-                console.log('destroyed');
             });
             ndeck.create();
             ndeck.set_pos(this.get_pos());

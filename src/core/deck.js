@@ -108,14 +108,30 @@ define(function(require) {
             let anim_time = skip ? 0 : ANIM_TIME_COMM;
             let card = await this.pop_card(top);
             tab.add_ent(card);
+            let prms = [];
             if(!top) {
                 tab.move_to_last(card, true);
+                prms.push(atween(this.scene.tweens, {
+                    x: 0, y: 0,
+                    last_x: 0, last_y: 0,
+                }, anim_time, {
+                    x: - SPC_BTWN_CARDS[0],
+                    y: - SPC_BTWN_CARDS[1],
+                    onUpdate: (tw, tar) => {
+                        let delt_x = tar.x - tar.last_x;
+                        let delt_y = tar.y - tar.last_y;
+                        tar.last_x = tar.x;
+                        tar.last_y = tar.y;
+                        this.cards_group.incXY(delt_x, delt_y);
+                    },
+                }));
             }
             let [nx, ny] = vec2.add(this.get_pos(), SPC_DRAW_CARD);
-            await atween(this.scene.tweens, card.go, anim_time, {
+            prms.push(atween(this.scene.tweens, card.go, anim_time, {
                 x: nx,
                 y: ny,
-            });
+            }));
+            await Promise.all(prms);
             if(this.cards_pool.length === 1) {
                 let bot_card = await this.pop_card(top);
                 tab.add_ent(bot_card);
@@ -126,7 +142,15 @@ define(function(require) {
         }
         
         async action_draw(tab) {
+            await this.draw_card(tab, true);
+        }
+        
+        async action_drawbot(tab) {
             await this.draw_card(tab, false);
+        }
+        
+        async on_doubletap(tab) {
+            await this.draw_card(tab, true);
         }
         
     }
