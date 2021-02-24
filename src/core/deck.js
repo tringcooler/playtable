@@ -14,7 +14,7 @@ define(function(require) {
     class c_deck extends c_entity {
         
         constructor(scene, cb_destroy = null) {
-            super(scene);
+            super(scene, 'deck');
             this.cards_pool = [];
             this.cb_destroy = cb_destroy;
             this.max_size = [0, 0];
@@ -151,6 +151,22 @@ define(function(require) {
         
         async on_doubletap(tab) {
             await this.draw_card(tab, true);
+        }
+        
+        async on_coveredby(tab, ent) {
+            if(!(ent instanceof c_entity) || ent.type !== 'card') {
+                return;
+            }
+            await tab.remove_ent(ent);
+            await this.add_card(ent, true);
+        }
+        
+        async on_coverwith(tab, ent) {
+            if(!(ent instanceof c_entity) || ent.type !== 'card') {
+                return;
+            }
+            await tab.remove_ent(ent);
+            await this.add_card(ent, false);
         }
         
     }

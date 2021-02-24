@@ -12,7 +12,7 @@ define(function(require) {
     class c_card extends c_entity {
         
         constructor(scene, front, back, zoom_scale = 0.5) {
-            super(scene);
+            super(scene, 'card');
             this.front_name = front;
             this.back_name = (back ?? front);
             this.zoom_scale = zoom_scale;

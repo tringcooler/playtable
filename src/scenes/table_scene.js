@@ -35,6 +35,7 @@ define(function(require) {
             deck.add_card(card, true, true);
         }
         table.add_ent(deck);
+        window.table = table;
     }
     
     function update(time, delta) {

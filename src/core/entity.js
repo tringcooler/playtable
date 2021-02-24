@@ -8,8 +8,9 @@ define(function(require) {
     
     class c_entity {
         
-        constructor(scene) {
+        constructor(scene, type) {
             this.scene = scene;
+            this.type = type;
             this.actions = this.get_actions();
             this.cover_range = DEFAULT_COVER_RANGE;
         }
