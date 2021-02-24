@@ -63,7 +63,7 @@ define(function(require) {
             }
             let [w, h] = this.get_size();
             let y = this.go.y + h / 2 + spc;
-            let x = this.go.x - w / 2 + idx * (w / (this.actions.length - 1));
+            let x = this.go.x + (this.actions.length < 2 ? 0 : idx * (w / (this.actions.length - 1)) - w / 2);
             return [x, y];
         }
         

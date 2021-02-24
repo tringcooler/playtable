@@ -68,12 +68,13 @@ define(function(require) {
                 this.cards_group.add(card.go);
             }
             let size_changed = false;
-            if(card.go.width > this.max_size[0]) {
-                this.max_size[0] = card.go.width;
+            let [cw, ch] = card.get_size();
+            if(cw > this.max_size[0]) {
+                this.max_size[0] = cw;
                 size_changed = true;
             }
-            if(card.go.height > this.max_size[1]) {
-                this.max_size[1] = card.go.height;
+            if(ch > this.max_size[1]) {
+                this.max_size[1] = ch;
                 size_changed = true;
             }
             if(size_changed) {
@@ -81,7 +82,7 @@ define(function(require) {
             }
         }
         
-        pop_card(top = true) {
+        async pop_card(top = true) {
             let rcard;
             if(top) {
                 rcard = this.cards_pool.pop();
