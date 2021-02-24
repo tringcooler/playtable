@@ -51,15 +51,17 @@ define(function(require) {
                     x: 0,
                     y: 0,
                 }));
-                let last_pos = [0, 0];
-                prms.push(atween(this.scene.tweens, {x: 0, y: 0}, anim_time, {
+                prms.push(atween(this.scene.tweens, {
+                    x: 0, y: 0,
+                    last_x: 0, last_y: 0,
+                }, anim_time, {
                     x: SPC_BTWN_CARDS[0],
                     y: SPC_BTWN_CARDS[1],
                     onUpdate: (tw, tar) => {
-                        let delt_x = tar.x - last_pos[0];
-                        let delt_y = tar.y - last_pos[1];
-                        last_pos[0] = tar.x;
-                        last_pos[1] = tar.y;
+                        let delt_x = tar.x - tar.last_x;
+                        let delt_y = tar.y - tar.last_y;
+                        tar.last_x = tar.x;
+                        tar.last_y = tar.y;
                         this.cards_group.incXY(delt_x, delt_y);
                     },
                 }));
