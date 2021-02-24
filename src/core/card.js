@@ -122,9 +122,9 @@ define(function(require) {
             ndeck.create();
             ndeck.set_pos(this.get_pos());
             await tab.remove_ent(this);
+            await ndeck.add_card(this, true, true);
             await tab.remove_ent(ent);
-            ndeck.add_card(this);
-            ndeck.add_card(ent);
+            await ndeck.add_card(ent);
             tab.add_ent(ndeck);
         }
         

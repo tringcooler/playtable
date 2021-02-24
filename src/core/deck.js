@@ -7,7 +7,8 @@ define(function(require) {
     const c_semaphore = require('core/util').semaphore;
     
     const
-        SPC_BTWN_CARDS = [-1, -2];
+        SPC_BTWN_CARDS = [-1, -2],
+        ANIM_TIME_COMM = 100;
     
     class c_deck extends c_entity {
         
@@ -29,18 +30,41 @@ define(function(require) {
             this.cards_group.destroy();
         }
         
-        add_card(card, top = true) {
+        async add_card(card, top = true, skip = false) {
+            let anim_time = skip ? 0 : ANIM_TIME_COMM;
             let nidx;
             if(top) {
-                card.go.setPosition(...vec2.dot(this.cards_pool.length, SPC_BTWN_CARDS));
-                this.cards_pool.push(card);
                 this.go.add(card.go);
+                card.go.setPosition(card.go.x - this.go.x, card.go.y - this.go.y);
+                let [nx, ny] = vec2.dot(this.cards_pool.length, SPC_BTWN_CARDS);
+                await atween(this.scene.tweens, card.go, anim_time, {
+                    x: nx,
+                    y: ny,
+                });
+                this.cards_pool.push(card);
                 this.cards_group.add(card.go);
             } else {
-                card.go.setPosition(0, 0);
-                this.cards_group.incXY(...SPC_BTWN_CARDS);
-                this.cards_pool.unshift(card);
                 this.go.addAt(card.go, 0);
+                card.go.setPosition(card.go.x - this.go.x, card.go.y - this.go.y);
+                let prms = [];
+                prms.push(atween(this.scene.tweens, card.go, anim_time, {
+                    x: 0,
+                    y: 0,
+                }));
+                let last_pos = [0, 0];
+                prms.push(atween(this.scene.tweens, {x: 0, y: 0}, anim_time, {
+                    x: SPC_BTWN_CARDS[0],
+                    y: SPC_BTWN_CARDS[1],
+                    onUpdate: (tw, tar) => {
+                        let delt_x = tar.x - last_pos[0];
+                        let delt_y = tar.y - last_pos[1];
+                        last_pos[0] = tar.x;
+                        last_pos[1] = tar.y;
+                        this.cards_group.incXY(delt_x, delt_y);
+                    },
+                }));
+                await Promise.all(prms);
+                this.cards_pool.unshift(card);
                 this.cards_group.add(card.go);
             }
             let size_changed = false;
@@ -73,6 +97,9 @@ define(function(require) {
                 this.destroy();
             }
             return rcard;
+        }
+        
+        async action_draw(tab) {
         }
         
     }
