@@ -2,7 +2,8 @@ define(function(require) {
     
     const
         c_table = require('core/table'),
-        c_card = require('core/card');
+        c_card = require('core/card'),
+        c_deck = require('core/deck');
     
     const 
         ASSETS = n => 'assets/' + n;
@@ -19,16 +20,21 @@ define(function(require) {
         this.load.image('icon_drawbot', IMGS('icon_drawbot'));
     }
     
-    function create() {
+    async function create() {
         let table = new c_table(this);
-        let card1 = new c_card(this, 'box', 'back');
-        let card2 = new c_card(this, 'box', 'back');
+        let deck = new c_deck(this, async deck => {
+            await table.remove_ent(deck);
+        });
         table.create();
-        card1.create();
-        card2.create();
         table.set_bg('bg');
-        table.add_ent(card1);
-        table.add_ent(card2);
+        deck.create();
+        deck.set_pos([0, 300]);
+        for(let i = 0; i < 5; i++) {
+            let card = new c_card(this, 'box', 'back');
+            await card.create();
+            deck.add_card(card, true, true);
+        }
+        table.add_ent(deck);
     }
     
     function update(time, delta) {
