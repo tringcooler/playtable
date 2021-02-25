@@ -68,6 +68,9 @@ define(function(require) {
                 ent.go.setInteractive();
             }
             this.group.add(ent.go);
+            if(this.ent_layer.getIndex(ent.go) < 0 && ent.go.displayList === this.ent_layer) {
+                ent.go.displayList = null;
+            }
             this.ent_layer.add(ent.go);
             this.ent_pool.add(ent);
         }
