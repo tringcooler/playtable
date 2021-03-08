@@ -15,16 +15,14 @@ define(function(require) {
         }
         
         create() {
-            this.go = this.scene.add.layer();
-            this.bg_layer = this.scene.make.layer();
-            this.ent_layer = this.scene.make.layer();
+            this.bg_layer = this.scene.add.layer();
+            this.ent_layer = this.scene.add.layer();
+            this.go = this.bg_layer;
             this.ui_layer = {
                 icon: this.scene.add.layer(),
                 zoom: this.scene.add.layer(),
             };
             this.group = this.scene.add.group();
-            this.go.add(this.bg_layer);
-            this.go.add(this.ent_layer);
             this.icon_go_pool = {};
             this.ent_pool = new Set();
             this.zoom_slot = null;
@@ -68,9 +66,6 @@ define(function(require) {
                 ent.go.setInteractive();
             }
             this.group.add(ent.go);
-            if(this.ent_layer.getIndex(ent.go) < 0 && ent.go.displayList === this.ent_layer) {
-                ent.go.displayList = null;
-            }
             this.ent_layer.add(ent.go);
             this.ent_pool.add(ent);
         }
