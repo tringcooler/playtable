@@ -28,7 +28,7 @@ define(function(require) {
         table.create();
         table.set_bg('bg');
         deck.create();
-        deck.set_pos([0, 300]);
+        table.put_at(deck, [0, 0]);
         for(let i = 0; i < 5; i++) {
             let card = new c_card(this, 'box', 'back');
             await card.create();

@@ -73,8 +73,8 @@ define(function(require) {
                     parr_scaleX: dscale,
                     scaleY: dscale,
                     angle: 0,
-                    x: this.scene.cameras.main.centerX,
-                    y: this.scene.cameras.main.centerY,
+                    x: tab.camera.centerX,
+                    y: tab.camera.centerY,
                 }));
                 prms.push(this.flip(false, true));
                 await Promise.all(prms);

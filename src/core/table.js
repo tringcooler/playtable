@@ -1,6 +1,7 @@
 define(function(require) {
     
     const asleep = require('core/util').asleep;
+    const vec2 = require('core/util').vec2;
     
     const
         IPT_TIME_TAP_D = 200,
@@ -43,15 +44,72 @@ define(function(require) {
             this.bg = this.scene.make.image({key: bgname});
             this.group.add(this.bg);
             this.bg_layer.add(this.bg);
+            this.bg_size = [this.bg.displayWidth, this.bg.displayHeight];
+            this.bg_rect = [
+                - this.bg_size[0] / 2, - this.bg_size[1] / 2,
+                this.bg_size[0] / 2, this.bg_size[1] / 2,
+            ];
+            this.camera = this.scene.cameras.main;
+            this.bg.setPosition(this.camera.centerX, this.camera.centerY);
             this.bg.setInteractive();
             this.scene.input.setDraggable(this.bg);
+            let bg_cmr_rect = [
+                this.camera.displayWidth - this.bg_rect[2],
+                this.camera.displayHeight - this.bg_rect[3],
+                this.bg_rect[2],
+                this.bg_rect[3],
+            ];
             this.bg.on('drag', (p, x, y) => {
+                if(x < bg_cmr_rect[0]) {
+                    x = bg_cmr_rect[0];
+                } else if(x > bg_cmr_rect[2]) {
+                    x = bg_cmr_rect[2];
+                }
+                if(y < bg_cmr_rect[1]) {
+                    y = bg_cmr_rect[1];
+                } else if(y > bg_cmr_rect[3]) {
+                    y = bg_cmr_rect[3];
+                }
                 this.group.incXY(x - this.bg.x, y - this.bg.y);
             });
             this.bg.on('pointerdown', async p => {
                 await this.close_all_menu();
                 await this.zoom_out();
             });
+        }
+        
+        pos_c2b(cpos) {
+            return vec2.add(cpos, [- this.bg.x, - this.bg.y]);
+        }
+        
+        pos_b2c(bpos) {
+            return vec2.add(bpos, [this.bg.x, this.bg.y]);
+        }
+        
+        safe_pos(esize, cpos) {
+            let bpos = this.pos_c2b(cpos);
+            let erect = [
+                bpos[0] - esize[0] / 2, bpos[1] - esize[1] / 2,
+                bpos[0] + esize[0] / 2, bpos[1] + esize[1] / 2,
+            ];
+            let edge_dist = [
+                this.bg_rect[0] - erect[0],
+                this.bg_rect[1] - erect[1],
+                erect[2] - this.bg_rect[2],
+                erect[3] - this.bg_rect[3],
+            ];
+            let rpos = [...bpos];
+            if(edge_dist[0] > 0) {
+                rpos[0] += edge_dist[0];
+            } else if(edge_dist[2] > 0) {
+                rpos[0] -= edge_dist[2];
+            }
+            if(edge_dist[1] > 0) {
+                rpos[1] += edge_dist[1];
+            } else if(edge_dist[3] > 0) {
+                rpos[1] -= edge_dist[3];
+            }
+            return this.pos_b2c(rpos);
         }
         
         add_ent(ent) {
@@ -103,7 +161,7 @@ define(function(require) {
                     }
                 }
                 if(!ipt_breakdrag) {
-                    ent.go.setPosition(x, y);
+                    ent.go.setPosition(...this.safe_pos(ent.get_size(), [x, y]));
                 }
             });
             ent.go.on('pointerdown', async p => {
@@ -159,6 +217,10 @@ define(function(require) {
                     ipt_stat = 'idle';
                 }
             });
+        }
+        
+        put_at(ent, bpos) {
+            ent.set_pos(this.pos_b2c(bpos));
         }
         
         find_top_cover(ent) {
