@@ -29,6 +29,19 @@ define(function(require) {
         destroy() {
             super.destroy();
             this.cards_group.destroy();
+            this.destroyed = true;
+        }
+        
+        pos_g2l(gpos) {
+            return vec2.add(gpos, [- this.go.x, - this.go.y]);
+        }
+        
+        pos_l2g(lpos) {
+            return vec2.add(lpos, [this.go.x, this.go.y]);
+        }
+        
+        get_top() {
+            return vec2.dot(this.cards_pool.length, SPC_BTWN_CARDS);
         }
         
         async add_card(card, top = true, skip = false) {
@@ -36,8 +49,8 @@ define(function(require) {
             let nidx;
             if(top) {
                 this.go.add(card.go);
-                card.go.setPosition(card.go.x - this.go.x, card.go.y - this.go.y);
-                let [nx, ny] = vec2.dot(this.cards_pool.length, SPC_BTWN_CARDS);
+                card.go.setPosition(...this.pos_g2l([card.go.x, card.go.y]));
+                let [nx, ny] = this.get_top();
                 await atween(this.scene.tweens, card.go, anim_time, {
                     x: nx,
                     y: ny,
@@ -46,7 +59,7 @@ define(function(require) {
                 this.cards_group.add(card.go);
             } else {
                 this.go.addAt(card.go, 0);
-                card.go.setPosition(card.go.x - this.go.x, card.go.y - this.go.y);
+                card.go.setPosition(...this.pos_g2l([card.go.x, card.go.y]));
                 let prms = [];
                 prms.push(atween(this.scene.tweens, card.go, anim_time, {
                     x: 0,
@@ -93,7 +106,7 @@ define(function(require) {
                 rcard = this.cards_pool.shift();
             }
             this.go.remove(rcard.go);
-            rcard.go.setPosition(rcard.go.x + this.go.x, rcard.go.y + this.go.y);
+            rcard.go.setPosition(...this.pos_l2g([rcard.go.x, rcard.go.y]));
             this.cards_group.remove(rcard.go);
             if(this.cards_pool.length === 0) {
                 if(this.cb_destroy instanceof Function) {
@@ -141,6 +154,19 @@ define(function(require) {
             }
         }
         
+        async merge_to_deck(dst, skip = false) {
+            let anim_time = skip ? 0 : ANIM_TIME_COMM;
+            let dtop = dst.pos_l2g(dst.get_top());
+            await atween(this.scene.tweens, this.go, anim_time, {
+                x: dtop[0],
+                y: dtop[1],
+            });
+            while(!this.destroyed) {
+                let card = await this.pop_card(false)
+                await dst.add_card(card, true, true);
+            }
+        }
+        
         async action_draw(tab) {
             await this.draw_card(tab, true);
         }
@@ -162,11 +188,15 @@ define(function(require) {
         }
         
         async on_coverwith(tab, ent) {
-            if(!(ent instanceof c_entity) || ent.type !== 'card') {
+            if(!(ent instanceof c_entity)) {
                 return;
             }
-            await tab.remove_ent(ent);
-            await this.add_card(ent, false);
+            if(ent.type === 'card') {
+                await tab.remove_ent(ent);
+                await this.add_card(ent, false);
+            } else if(ent.type === 'deck') {
+                await this.merge_to_deck(ent);
+            }
         }
         
     }
