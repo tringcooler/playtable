@@ -236,6 +236,7 @@ define(function(require) {
                 }
                 if(dent.check_covered(ent.get_pos())) {
                     if(didx > top_idx) {
+                        top_idx = didx;
                         top_ent = dent;
                     }
                 }
